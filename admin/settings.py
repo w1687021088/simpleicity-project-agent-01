@@ -36,6 +36,9 @@ class AppConfigSettings(BaseSettings):
     ADMIN_REDIS_MAX_CONNECTIONS: int  # redis 最大连接数
     ADMIN_REDIS_DB: int  # redis 数据库
 
+    # 雪花 id
+    ADMIN_SNOWFLAKE_WORKER_ID: int  # worker id
+
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parent / ".env",  # 指定文件（相对于当前文件路径）
         env_file_encoding="utf-8",

@@ -5,6 +5,7 @@ from src.models import BaseModel
 class User(BaseModel):
     """用户表"""
     username = fields.CharField(max_length=50, unique=True, description="用户名")
+    user_id = fields.BigIntField(unique=True, description="用户公开唯一标识（雪花ID）")
     password = fields.CharField(max_length=255, description="密码哈希")
     nickname = fields.CharField(max_length=50, null=True, description="昵称")
     email = fields.CharField(max_length=100, null=True, unique=True, description="邮箱")
