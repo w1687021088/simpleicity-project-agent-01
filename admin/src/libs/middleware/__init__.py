@@ -11,6 +11,9 @@ def register_middleware(app: FastAPI):
     :return: None
     """
 
+    # 添加请求体缓存中间件
+    app.add_middleware(CacheRequestBodyMiddleware)
+
     # cors
     app.add_middleware(
         CORSMiddleware,
@@ -22,6 +25,3 @@ def register_middleware(app: FastAPI):
 
     # 访问日志
     visit_log_middleware(app)
-
-    # 添加请求体缓存中间件
-    app.add_middleware(CacheRequestBodyMiddleware)
