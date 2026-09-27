@@ -11,7 +11,17 @@ function App() {
   return (
     <>
       <div className="mt-3.5 flex w-full items-center justify-center gap-4">
-        <Button variant="outline" onClick={getUserInfo}>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            try {
+              await getUserInfo();
+              console.log('User info retrieved successfully');
+            } catch (error) {
+              console.error('失败:', error);
+            }
+          }}
+        >
           测试
         </Button>
       </div>
