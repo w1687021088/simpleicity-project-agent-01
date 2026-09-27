@@ -1,4 +1,3 @@
-// src/utils/http.ts
 import axios, {
   type AxiosRequestConfig,
   type AxiosResponse,
@@ -13,17 +12,20 @@ export interface FieldError {
   msg: string;
 }
 
-/** 后端统一响应结构（成功 & 失败共用） */
+/**
+ * 后端统一响应结构（成功 & 失败共用）
+ * - 成功：success=true, code=0, data=业务数据
+ * - 失败：success=false, code=业务错误码, data=null，可带 path/request_id/errors
+ */
 export interface ApiResponse<T = unknown> {
-  code: number | string;
-  data: T;
+  success: boolean;
+  code: number;
   message: string;
+  data: T;
   timestamp: string;
-  /** 仅错误响应会带，success: false 表示业务失败 */
-  success?: boolean;
+  /** 仅错误响应带 */
   path?: string;
   request_id?: string;
-  /** 参数校验错误详情 */
   errors?: FieldError[];
 }
 
@@ -37,7 +39,7 @@ export type QueryParams = Record<string, QueryValue>;
 /** 路径参数对象 */
 export type PathParams = Record<string, string | number>;
 
-/** 快捷方法的额外选项：透传给 axios，但不能覆盖 url / method / data / params */
+/** 快捷方法的额外选项 */
 export interface RequestOptions extends Omit<
   AxiosRequestConfig,
   'url' | 'method' | 'data' | 'params'
@@ -49,7 +51,7 @@ export interface RequestOptions extends Omit<
 // ---------- 业务错误类 ----------
 
 export class ApiError extends Error {
-  code: number | string;
+  code: number;
   data: unknown;
   requestId?: string;
   errors?: FieldError[];
@@ -57,7 +59,7 @@ export class ApiError extends Error {
 
   constructor(opts: {
     message: string;
-    code: number | string;
+    code: number;
     data?: unknown;
     requestId?: string;
     errors?: FieldError[];
@@ -80,12 +82,6 @@ export class ApiError extends Error {
 
 // ---------- 参数处理 ----------
 
-/**
- * 清理查询参数：
- * - 移除 undefined / null / 空字符串
- * - 空数组也移除
- * - 数组保留原样，由 axios 序列化为 `key=v1&key=v2`
- */
 function cleanParams(
   params?: QueryParams,
 ): Record<string, unknown> | undefined {
@@ -101,12 +97,7 @@ function cleanParams(
 }
 
 /**
- * 替换路径参数
- * 支持 `:id` 和 `{id}` 两种占位符格式
- *
- * @example
- *   buildPath('/users/:id', { id: 1 })   // '/users/1'
- *   buildPath('/users/{id}/posts/:pid', { id: 1, pid: 2 }) // '/users/1/posts/2'
+ * 替换路径参数，支持 `:id` 和 `{id}` 两种占位符
  */
 export function buildPath(template: string, params: PathParams): string {
   const replace = (_: string, key: string) => {
@@ -116,12 +107,9 @@ export function buildPath(template: string, params: PathParams): string {
     }
     return encodeURIComponent(String(value));
   };
-  return template
-    .replace(/\{(\w+)\}/g, replace) // {id}
-    .replace(/:(\w+)/g, replace); // :id
+  return template.replace(/\{(\w+)\}/g, replace).replace(/:(\w+)/g, replace);
 }
 
-/** 从 options 中剥离 pathParams，替换到 url 上 */
 function resolveConfig(
   url: string,
   options?: RequestOptions,
@@ -141,7 +129,6 @@ const instance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  // 数组序列化为 `key=v1&key=v2`（而非 `key[]=v1&key[]=v2`）
   paramsSerializer: {
     indexes: null,
   },
@@ -166,7 +153,7 @@ instance.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     const body = response.data;
 
-    // 后端业务错误：HTTP 200，但 body.success === false
+    // 后端业务错误：HTTP 200，但 success === false
     if (body?.success === false) {
       return Promise.reject(
         new ApiError({
@@ -191,7 +178,8 @@ instance.interceptors.response.use(
       // window.location.href = '/login';
     }
 
-    // 服务端返回了响应体（如 400 / 500，或 FastAPI 兜底 500）
+    // 服务端返回了响应体（HTTP 4xx/5xx，或 FastAPI 兜底 500）
+    // 新结构下，错误响应也带 success=false、code、message、data
     if (resp) {
       const body = resp.data;
       return Promise.reject(
@@ -221,10 +209,6 @@ instance.interceptors.response.use(
 
 /**
  * 泛型请求：直接返回后端的 `data` 字段
- * 适合需要完全自定义配置的场景
- *
- * @example
- *   const user = await request<User>({ url: '/user/1', method: 'GET' });
  */
 export async function request<T = unknown>(
   config: AxiosRequestConfig,
@@ -236,10 +220,6 @@ export async function request<T = unknown>(
 
 /**
  * 泛型请求：保留完整响应结构
- * 需要读取 code / message / timestamp 时使用
- *
- * @example
- *   const { code, message, data } = await requestRaw<User[]>({ url: '/users' });
  */
 export async function requestRaw<T = unknown>(
   config: AxiosRequestConfig,
@@ -266,7 +246,7 @@ export function get<T = unknown>(
   });
 }
 
-/** POST（支持同时带 query 参数） */
+/** POST */
 export function post<T = unknown>(
   url: string,
   data?: unknown,
