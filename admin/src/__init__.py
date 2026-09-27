@@ -5,6 +5,7 @@ from src.apps import register_routes
 from src.libs import (
     register_middleware,
     register_exception,
+    register_db,
 )
 
 from fastapi import FastAPI
@@ -45,5 +46,8 @@ def create_app() -> FastAPI:
 
     # 注册异常处理
     register_exception(app)
+
+    # 注册数据库
+    register_db(app)
 
     return app

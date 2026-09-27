@@ -13,5 +13,9 @@ dependencies = [
     "redis>=8.1.0",
     "snowflake-id>=1.0.2",
     "starlette>=1.7.0",
+    "tortoise-orm[asyncpg]>=1.1.8",
     "uvicorn[standard]>=0.54.0",
 ]
+
+[tool.tortoise]
+tortoise_orm = "src.config.db_config.TORTOISE_ORM"

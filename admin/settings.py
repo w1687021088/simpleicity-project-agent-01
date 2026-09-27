@@ -13,6 +13,17 @@ class AppConfigSettings(BaseSettings):
     ADMIN_APP_PORT: int  # 端口
     ADMIN_LOGER_DEBUG: bool # 日志是否调试模式
 
+    # 数据库
+    ADMIN_DB_HOST: str
+    ADMIN_DB_PORT: int
+    ADMIN_DB_USER: str
+    ADMIN_DB_PASSWORD: str
+    ADMIN_DB_NAME: str
+
+    # 数据库连接池
+    ADMIN_DB_POOL_MIN: int
+    ADMIN_DB_POOL_MAX: int
+
     # jwt
     ADMIN_JWT_SECRET_KEY: str  # 密钥
     ADMIN_JWT_ALGORITHM: str  # 算法
