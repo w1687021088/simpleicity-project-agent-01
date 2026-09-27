@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Optional, Any, NoReturn
 from fastapi import Request, status, FastAPI
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -33,7 +33,7 @@ class AppException(Exception):
         super().__init__(self.message)
 
 
-def raise_biz_error(code: BizCode, message: Optional[str] = None, data: Optional[Any] = None, **kwargs):
+def raise_biz_error(code: BizCode, message: Optional[str] = None, data: Optional[Any] = None, **kwargs) -> NoReturn:
     """快捷抛出业务异常"""
     raise AppException(code=code, message=message, data=data, **kwargs)
 

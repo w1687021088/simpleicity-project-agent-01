@@ -40,7 +40,7 @@ def decode_access_token(token: str) -> dict:
 
 def access_token_blocklist_key_prefix(jti: str) -> str:
     """获取访问令牌黑名单 key 前缀"""
-    return f"auth:access-token:{jti}"
+    return f"auth:agentadmin:access-token:{jti}"
 
 
 def get_access_token_remaining_seconds(token: str) -> int:

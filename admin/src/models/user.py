@@ -14,3 +14,5 @@ class User(BaseModel):
     class Meta:
         table = "sys_user"
         table_description = "用户表"
+        # 默认排序
+        ordering = ["-created_at"]
