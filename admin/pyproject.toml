@@ -2,4 +2,14 @@
 name = "admin-serve"
 version = "0.1.0"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "bcrypt>=5.0.0",
+    "fastapi[standard]>=0.141.1",
+    "loguru>=0.7.3",
+    "passlib[bcrypt]>=1.7.4",
+    "pyjwt>=2.15.0",
+    "python-dotenv>=1.2.3",
+    "redis>=8.1.0",
+    "snowflake-id>=1.0.2",
+    "starlette>=1.7.0",
+]
