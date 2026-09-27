@@ -5,6 +5,7 @@ from src.libs.logger import logger
 
 
 def visit_log_middleware(app: FastAPI) -> Callable[[Request, Callable], Response]:
+    """访问日志中间件"""
     # 日志
     @app.middleware('http')  # 中间件的类型。目前只支持“http”。
     async def middleware(request: Request, call_next):
