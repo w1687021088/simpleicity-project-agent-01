@@ -11,6 +11,7 @@ class AppConfigSettings(BaseSettings):
     # 基础配置
     ADMIN_APP_HOST: str  # ip
     ADMIN_APP_PORT: int  # 端口
+    ADMIN_LOGER_DEBUG: bool # 日志是否调试模式
 
     # jwt
     ADMIN_JWT_SECRET_KEY: str  # 密钥

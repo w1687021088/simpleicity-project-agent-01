@@ -35,8 +35,10 @@ def create_logger():
         retention="4 weeks",
         mode="a+",
         encoding="utf-8",
-        level='ERROR',  # 记录 ERROR、CRITICAL
-        format="{time: YYYY-MM-DD HH:mm:ss} | {level} | {name}:{function}:{line} | {message} | {extra}",
+        level='ERROR',
+        format="{time: YYYY-MM-DD HH:mm:ss} | {level} | {name}:{function}:{line} | {message} | {extra}\n{exception}",
+        diagnose=app_settings.ADMIN_LOGER_DEBUG,  # 开发显示局部变量，生产不显示
+        backtrace=app_settings.ADMIN_LOGER_DEBUG,  # 开发展开跨帧，生产不展开
         enqueue=False,
     )
 
