@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from src.libs.logger import logger
 
 from src.apps import register_routes
+from src.libs import register_middleware
 
 from fastapi import FastAPI
 
@@ -35,5 +36,8 @@ def create_app() -> FastAPI:
 
     # 注册路由
     register_routes(app)
+
+    # 注册中间件
+    register_middleware(app)
 
     return app

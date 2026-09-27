@@ -18,9 +18,10 @@ def visit_log_middleware(app: FastAPI) -> Callable[[Request, Callable], Response
         response = await call_next(request)
         end_time = time.time()
         total_time = end_time - start_time
+        request_id = request.state.request_id
 
         logger.info(
-            f"客户端 ip：{request.client} 请求方法：{request.method} 请求路径：{request.url} 请求头：{request.headers} 响应状态码：{response.status_code} 响应时间：{total_time}"
+            f"request_id: {request_id} 客户端 ip：{request.client} 请求方法：{request.method} 请求路径：{request.url} 请求头：{request.headers} 响应状态码：{response.status_code} 响应时间：{total_time}"
         )
 
         response.headers["X-Process-Time"] = str(total_time)

@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button.tsx';
 import { Spinner } from '@/components/ui/spinner';
+import { getUserInfo } from '@/apis/user';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 const appTitle = import.meta.env.VITE_APP_TITLE;
@@ -26,6 +27,11 @@ function App() {
         <Button disabled>
           <Spinner />
           加载中...
+        </Button>
+      </div>
+      <div className="flex items-center gap-4">
+        <Button variant="outline" onClick={getUserInfo}>
+          轮廓
         </Button>
       </div>
     </>

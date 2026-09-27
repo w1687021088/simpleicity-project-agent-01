@@ -5,4 +5,4 @@ router = APIRouter()
 
 @router.get("/info", description="获取用户信息")
 async def info():
-    pass
+    return {"code": 200, "msg": "ok", "data": {"app": "你好"}}
