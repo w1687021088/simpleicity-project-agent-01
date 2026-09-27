@@ -11,23 +11,30 @@ class AppConfigSettings(BaseSettings):
     # 基础配置
     ADMIN_APP_HOST: str  # ip
     ADMIN_APP_PORT: int  # 端口
-    ADMIN_LOGER_DEBUG: bool # 日志是否调试模式
+    ADMIN_LOGER_DEBUG: bool  # 日志是否调试模式
 
     # 数据库
-    ADMIN_DB_HOST: str
-    ADMIN_DB_PORT: int
-    ADMIN_DB_USER: str
-    ADMIN_DB_PASSWORD: str
-    ADMIN_DB_NAME: str
+    ADMIN_DB_HOST: str  # 数据库主机
+    ADMIN_DB_PORT: int  # 数据库端口
+    ADMIN_DB_USER: str  # 数据库用户
+    ADMIN_DB_PASSWORD: str  # 数据库密码
+    ADMIN_DB_NAME: str  # 数据库名
 
     # 数据库连接池
-    ADMIN_DB_POOL_MIN: int
-    ADMIN_DB_POOL_MAX: int
+    ADMIN_DB_POOL_MIN: int  # 连接池最小连接数
+    ADMIN_DB_POOL_MAX: int  # 连接池最大连接数
 
     # jwt
     ADMIN_JWT_SECRET_KEY: str  # 密钥
     ADMIN_JWT_ALGORITHM: str  # 算法
     ADMIN_JWT_EXPIRE_MINUTES: int  # 过期时间(分钟)
+
+    # redis
+    ADMIN_REDIS_HOST: str  # redis 主机
+    ADMIN_REDIS_PORT: int  # redis 端口
+    ADMIN_REDIS_PASSWORD: str  # redis 密码
+    ADMIN_REDIS_MAX_CONNECTIONS: int  # redis 最大连接数
+    ADMIN_REDIS_DB: int  # redis 数据库
 
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parent / ".env",  # 指定文件（相对于当前文件路径）
