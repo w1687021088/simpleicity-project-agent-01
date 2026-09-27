@@ -27,6 +27,25 @@ export interface ApiResponse<T = unknown> {
   errors?: FieldError[];
 }
 
+/** 单个查询参数允许的值类型 */
+export type QueryValue =
+  string | number | boolean | null | undefined | (string | number)[];
+
+/** 查询参数对象 */
+export type QueryParams = Record<string, QueryValue>;
+
+/** 路径参数对象 */
+export type PathParams = Record<string, string | number>;
+
+/** 快捷方法的额外选项：透传给 axios，但不能覆盖 url / method / data / params */
+export interface RequestOptions extends Omit<
+  AxiosRequestConfig,
+  'url' | 'method' | 'data' | 'params'
+> {
+  /** 路径参数，用于替换 url 中的 `:id` 或 `{id}` */
+  pathParams?: PathParams;
+}
+
 // ---------- 业务错误类 ----------
 
 export class ApiError extends Error {
@@ -59,6 +78,61 @@ export class ApiError extends Error {
   }
 }
 
+// ---------- 参数处理 ----------
+
+/**
+ * 清理查询参数：
+ * - 移除 undefined / null / 空字符串
+ * - 空数组也移除
+ * - 数组保留原样，由 axios 序列化为 `key=v1&key=v2`
+ */
+function cleanParams(
+  params?: QueryParams,
+): Record<string, unknown> | undefined {
+  if (!params) return undefined;
+
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null || value === '') continue;
+    if (Array.isArray(value) && value.length === 0) continue;
+    result[key] = value;
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
+/**
+ * 替换路径参数
+ * 支持 `:id` 和 `{id}` 两种占位符格式
+ *
+ * @example
+ *   buildPath('/users/:id', { id: 1 })   // '/users/1'
+ *   buildPath('/users/{id}/posts/:pid', { id: 1, pid: 2 }) // '/users/1/posts/2'
+ */
+export function buildPath(template: string, params: PathParams): string {
+  const replace = (_: string, key: string) => {
+    const value = params[key];
+    if (value === undefined) {
+      throw new Error(`缺少路径参数: ${key}（模板: ${template}）`);
+    }
+    return encodeURIComponent(String(value));
+  };
+  return template
+    .replace(/\{(\w+)\}/g, replace) // {id}
+    .replace(/:(\w+)/g, replace); // :id
+}
+
+/** 从 options 中剥离 pathParams，替换到 url 上 */
+function resolveConfig(
+  url: string,
+  options?: RequestOptions,
+): { url: string; options: Omit<RequestOptions, 'pathParams'> } {
+  const { pathParams, ...rest } = options ?? {};
+  return {
+    url: pathParams ? buildPath(url, pathParams) : url,
+    options: rest,
+  };
+}
+
 // ---------- 创建实例 ----------
 
 const instance = axios.create({
@@ -66,6 +140,10 @@ const instance = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
+  },
+  // 数组序列化为 `key=v1&key=v2`（而非 `key[]=v1&key[]=v2`）
+  paramsSerializer: {
+    indexes: null,
   },
 });
 
@@ -139,14 +217,14 @@ instance.interceptors.response.use(
   },
 );
 
-// ---------- 泛型 request ----------
+// ---------- 底层方法 ----------
 
 /**
  * 泛型请求：直接返回后端的 `data` 字段
+ * 适合需要完全自定义配置的场景
  *
  * @example
  *   const user = await request<User>({ url: '/user/1', method: 'GET' });
- *   const list = await request<User[]>({ url: '/users', method: 'GET' });
  */
 export async function request<T = unknown>(
   config: AxiosRequestConfig,
@@ -169,6 +247,89 @@ export async function requestRaw<T = unknown>(
   const response: AxiosResponse<ApiResponse<T>> =
     await instance.request(config);
   return response.data;
+}
+
+// ---------- 快捷方法 ----------
+
+/** GET */
+export function get<T = unknown>(
+  url: string,
+  params?: QueryParams,
+  options?: RequestOptions,
+): Promise<T> {
+  const resolved = resolveConfig(url, options);
+  return request<T>({
+    ...resolved.options,
+    url: resolved.url,
+    method: 'GET',
+    params: cleanParams(params),
+  });
+}
+
+/** POST（支持同时带 query 参数） */
+export function post<T = unknown>(
+  url: string,
+  data?: unknown,
+  params?: QueryParams,
+  options?: RequestOptions,
+): Promise<T> {
+  const resolved = resolveConfig(url, options);
+  return request<T>({
+    ...resolved.options,
+    url: resolved.url,
+    method: 'POST',
+    data,
+    params: cleanParams(params),
+  });
+}
+
+/** PUT */
+export function put<T = unknown>(
+  url: string,
+  data?: unknown,
+  params?: QueryParams,
+  options?: RequestOptions,
+): Promise<T> {
+  const resolved = resolveConfig(url, options);
+  return request<T>({
+    ...resolved.options,
+    url: resolved.url,
+    method: 'PUT',
+    data,
+    params: cleanParams(params),
+  });
+}
+
+/** PATCH */
+export function patch<T = unknown>(
+  url: string,
+  data?: unknown,
+  params?: QueryParams,
+  options?: RequestOptions,
+): Promise<T> {
+  const resolved = resolveConfig(url, options);
+  return request<T>({
+    ...resolved.options,
+    url: resolved.url,
+    method: 'PATCH',
+    data,
+    params: cleanParams(params),
+  });
+}
+
+/** DELETE */
+export function del<T = unknown>(
+  url: string,
+  params?: QueryParams,
+  options?: RequestOptions,
+): Promise<T> {
+  const resolved = resolveConfig(url, options);
+  return request<T>({
+    ...resolved.options,
+    url: resolved.url,
+    method: 'DELETE',
+    params: cleanParams(params),
+  });
 }
 
 export default instance;

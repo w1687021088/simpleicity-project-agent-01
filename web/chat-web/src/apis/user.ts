@@ -1,8 +1,5 @@
-import { request } from '@/utils/http';
+import { get } from '@/utils/http';
 
 export const getUserInfo = async () => {
-  return request({
-    url: '/api/v1/system/user/info',
-    method: 'get',
-  });
+  return get('/api/v1/system/user/info');
 };
