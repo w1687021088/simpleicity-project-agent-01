@@ -114,6 +114,37 @@ await get('/users/batch', { ids: [1, 2, 3] });
 
 ---
 
+## 响应结构
+
+成功和失败共用同一套结构：
+
+```jsonc
+// 成功
+{
+  "success": true,
+  "code": 0,
+  "message": "操作成功",
+  "data": { /* 业务数据 */ },
+  "timestamp": "2026-09-27T..."
+}
+
+// 失败
+{
+  "success": false,
+  "code": 40001,
+  "message": "请求参数校验失败",
+  "data": null,
+  "timestamp": "2026-09-27T...",
+  "path": "/api/xxx",
+  "request_id": "abc-123",
+  "errors": [{ "field": "email", "msg": "..." }]
+}
+```
+
+响应拦截器检测到 `success === false` 时，会主动抛出 `ApiError`。
+
+---
+
 ## 错误处理
 
 所有错误均为 `ApiError`。
@@ -139,7 +170,7 @@ try {
 | 属性 | 类型 | 说明 |
 |------|------|------|
 | `message` | `string` | 错误信息 |
-| `code` | `number \| string` | 业务码或 HTTP 状态码 |
+| `code` | `number` | 业务错误码或 HTTP 状态码 |
 | `data` | `unknown` | 附加数据 |
 | `requestId` | `string?` | 后端 request_id |
 | `errors` | `FieldError[]?` | 字段校验错误 |
@@ -149,12 +180,13 @@ try {
 
 ## 完整响应结构
 
-需要读取 `code`、`message`、`timestamp` 时：
+需要读取 `success`、`code`、`message`、`timestamp` 时：
 
 ```ts
 import { requestRaw } from '@/utils/http';
 
-const { code, message, timestamp, data } = await requestRaw<User[]>('/users');
+const { success, code, message, timestamp, data } =
+  await requestRaw<User[]>('/users');
 ```
 
 ---
