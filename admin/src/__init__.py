@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
 from src.libs.logger import logger
 
+from src.apps import register_routes
+
 from fastapi import FastAPI
 
 
@@ -30,5 +32,8 @@ async def lifespan(_: FastAPI):
 def create_app() -> FastAPI:
     """创建应用"""
     app = FastAPI(lifespan=lifespan, title="agent-dev-admin", docs_url="/admin/docs")
+
+    # 注册路由
+    register_routes(app)
 
     return app
