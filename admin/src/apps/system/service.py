@@ -1,9 +1,13 @@
+from datetime import datetime, UTC
+
+
 from src.config.biz_code import BizCode
 from src.libs.exception import raise_biz_error
 from src.models import User
 from src.utils.bcrypt_utils import hash_password, verify_password
 from src.utils.snowflake_utils import generate_snowflake_id
-from src.utils.jwt_utils import create_access_token
+from src.utils.jwt_utils import create_access_token, access_token_blocklist_key_prefix
+from src.utils.redis_client import app_redis
 from src.apps.system.schemas import (
     AuthRegisterBody,
     AuthRegisterResponse,
@@ -100,3 +104,24 @@ async def get_user_info(current_user: dict) -> UserInfoResponse:
         created_at=user.created_at.isoformat(),
         updated_at=user.updated_at.isoformat(),
     )
+
+
+async def handle_logout(current_user: dict):
+    """处理登出逻辑"""
+    jti = current_user.get("jti")
+    exp = current_user.get("exp")
+    if not jti:
+        raise_biz_error(BizCode.TOKEN_MISSING_JTI)
+
+    blacklist_key = access_token_blocklist_key_prefix(jti)
+
+    if exp:
+        ttl = int(exp - datetime.now(UTC).timestamp())
+        if ttl > 0:
+            await app_redis.set(blacklist_key, "1", ex=ttl)
+        else:
+            # token 已过期，仍保留 60 秒作为缓冲
+            await app_redis.set(blacklist_key, "1", ex=60)
+    else:
+        # 无 exp 则默认保留 1 小时
+        await app_redis.set(blacklist_key, "1", ex=3600)
