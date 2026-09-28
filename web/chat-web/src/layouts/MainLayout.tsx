@@ -47,7 +47,7 @@ function getInitial(
 export default function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { clearToken, user } = useAuth();
+  const { clearToken, user, loading } = useAuth();
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
@@ -75,8 +75,11 @@ export default function MainLayout() {
 
   const isActive = (to: string) => location.pathname === to;
 
-  const displayName = user?.nickname || user?.username || '未登录';
-  const initial = getInitial(user);
+  // 加载中显示占位，避免闪「未登录」
+  const displayName = loading
+    ? '加载中…'
+    : user?.nickname || user?.username || '未登录';
+  const initial = loading ? '·' : getInitial(user);
 
   /* ---------- 导航 ---------- */
   const desktopNav = (
@@ -135,7 +138,7 @@ export default function MainLayout() {
     </nav>
   );
 
-  /* ---------- 用户菜单内容（桌面 + 移动共用） ---------- */
+  /* ---------- 用户菜单内容 ---------- */
   const userMenuContent = (
     <DropdownMenuContent
       side="right"
@@ -149,7 +152,7 @@ export default function MainLayout() {
         </Avatar>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">{displayName}</p>
-          {user?.email && (
+          {!loading && user?.email && (
             <p className="truncate text-xs text-muted-foreground">
               {user.email}
             </p>
@@ -159,7 +162,7 @@ export default function MainLayout() {
 
       <DropdownMenuSeparator />
 
-      <DropdownMenuItem onClick={handleSettings}>
+      <DropdownMenuItem onClick={handleSettings} disabled={loading}>
         <Settings className="size-4" />
         设置
       </DropdownMenuItem>
@@ -168,7 +171,8 @@ export default function MainLayout() {
 
       <DropdownMenuItem
         onClick={handleLogout}
-        className="text-destructive focus:text-destructive"
+        disabled={loading}
+        className="text-destructive"
       >
         <LogOut className="size-4" />
         退出登录
@@ -184,9 +188,11 @@ export default function MainLayout() {
           <button
             type="button"
             aria-label="用户菜单"
+            disabled={loading}
             className={cn(
               'flex w-full items-center gap-2 rounded-md p-1.5 text-left transition-colors hover:bg-muted',
               collapsed && 'justify-center',
+              loading && 'cursor-default opacity-60',
             )}
           />
         }
@@ -202,7 +208,7 @@ export default function MainLayout() {
         >
           {displayName}
         </span>
-        {!collapsed && (
+        {!collapsed && !loading && (
           <MoreHorizontal className="size-4 shrink-0 text-muted-foreground" />
         )}
       </DropdownMenuTrigger>
@@ -218,7 +224,11 @@ export default function MainLayout() {
           <button
             type="button"
             aria-label="用户菜单"
-            className="flex w-full items-center gap-2 rounded-md p-1.5 text-left transition-colors hover:bg-muted"
+            disabled={loading}
+            className={cn(
+              'flex w-full items-center gap-2 rounded-md p-1.5 text-left transition-colors hover:bg-muted',
+              loading && 'cursor-default opacity-60',
+            )}
           />
         }
       >
@@ -228,7 +238,9 @@ export default function MainLayout() {
         <span className="min-w-0 flex-1 truncate text-sm font-medium">
           {displayName}
         </span>
-        <MoreHorizontal className="size-4 shrink-0 text-muted-foreground" />
+        {!loading && (
+          <MoreHorizontal className="size-4 shrink-0 text-muted-foreground" />
+        )}
       </DropdownMenuTrigger>
       {userMenuContent}
     </DropdownMenu>
@@ -257,7 +269,6 @@ export default function MainLayout() {
           collapsed ? 'w-16 px-2' : 'w-56 px-4',
         )}
       >
-        {/* 顶部：Logo + 项目名 + 折叠 */}
         <div
           className={cn(
             'mb-4 flex items-center gap-2',
@@ -303,7 +314,6 @@ export default function MainLayout() {
 
         {desktopNav}
 
-        {/* 底部：用户区 */}
         <div className="mt-2 border-t border-border/60 pt-2">{desktopUser}</div>
       </aside>
 
