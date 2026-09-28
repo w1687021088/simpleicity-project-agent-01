@@ -7,7 +7,6 @@ dependencies = [
     "fastapi[standard]>=0.141.1",
     "httpx>=0.28.1",
     "loguru>=0.7.3",
-    "passlib[bcrypt]>=1.7.4",
     "pyjwt>=2.15.0",
     "python-dotenv>=1.2.3",
     "redis>=8.1.0",

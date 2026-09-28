@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field, field_validator, ValidationInfo
 import re
 from typing import Annotated
 
+from src.config.response import AppResponseModel
+
 
 def _validate_password_strength(v: str) -> str:
     """密码强度校验：长度8~32，必须含数字和特殊符号，只能包含特定字符集"""
@@ -29,6 +31,8 @@ class AuthRegisterBody(BaseModel):
 
     email: Annotated[str | None, Field(examples=["example@example.com"], description="邮箱地址")] = None
 
+    nickname: Annotated[str | None, Field(examples=["张三"], description="昵称")] = None
+
     @field_validator("confirm_password")
     def validate_confirm_password(cls, v: str, info: ValidationInfo) -> str:
         if v != info.data.get("password"):
@@ -55,7 +59,7 @@ class AuthRegisterBody(BaseModel):
         if not cleaned.startswith("1"):
             raise ValueError("手机号必须以 1 开头")
 
-        return cleaned   # ← 返回清洗后的值
+        return cleaned  # ← 返回清洗后的值
 
     @field_validator("email")
     def validate_email(cls, v: str | None) -> str | None:
@@ -72,24 +76,24 @@ class AuthRegisterBody(BaseModel):
         return v
 
 
-class AuthRegisterResponse(BaseModel):
-    """注册响应"""
-    token: str
-
-
 class UserInfoResponse(BaseModel):
     """用户信息"""
     user_id: Annotated[str, Field(description="用户ID")]
     username: Annotated[str, Field(description="用户名")]
     phone: Annotated[str | None, Field(description="手机号码")]
     email: Annotated[str | None, Field(description="邮箱地址")]
-    avatar: Annotated[str | None, Field(description="用户头像")]
+    nickname: Annotated[str | None, Field(description="昵称")]
     created_at: Annotated[str, Field(description="创建时间")]
     updated_at: Annotated[str, Field(description="更新时间")]
-    enabled: Annotated[bool, Field(description="是否启用")]
+    is_active: Annotated[bool, Field(description="是否启用")]
 
 
-class AuthLoginResponse(UserInfoResponse):
+class RegisterResponse(UserInfoResponse):
+    """注册响应"""
+    token: str
+
+
+class LoginResponse(UserInfoResponse):
     """登录响应"""
     token: str
 
@@ -122,3 +126,8 @@ class AuthChangePasswordBody(BaseModel):
         if old and v == old:
             raise ValueError("新密码不能与旧密码相同")
         return v
+
+
+AuthRegisterResponse = AppResponseModel[RegisterResponse]
+
+AuthLoginResponse = AppResponseModel[LoginResponse]

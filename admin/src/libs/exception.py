@@ -98,13 +98,17 @@ def register_exception(app: FastAPI):
         request_id = getattr(request.state, "request_id", None)
         path = request.url.path
         method = request.method
+        body_str = _get_body_str(request)
 
         logger.bind(
             path=path,
             method=method,
+            path_params=dict(request.path_params),
+            query_params=dict(request.query_params),
             request_id=request_id,
             code=int(exc.code),
             message=exc.message,
+            request_body=body_str,
         ).warning(f"业务异常: {path}")
 
         return AppResponse(
