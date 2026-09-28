@@ -6,8 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-
-const TOKEN_KEY = 'token';
+import { STORAGE_KEYS } from '@/config/constant';
 
 interface AuthContextValue {
   token: string | null;
@@ -19,16 +18,16 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setTokenState] = useState<string | null>(() =>
-    localStorage.getItem(TOKEN_KEY),
+    localStorage.getItem(STORAGE_KEYS.TOKEN),
   );
 
   const setToken = useCallback((t: string) => {
-    localStorage.setItem(TOKEN_KEY, t);
+    localStorage.setItem(STORAGE_KEYS.TOKEN, t);
     setTokenState(t);
   }, []);
 
   const clearToken = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
     setTokenState(null);
   }, []);
 

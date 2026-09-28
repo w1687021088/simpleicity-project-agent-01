@@ -1,4 +1,5 @@
 import { get, post } from '@/utils/http';
+import { API_PATHS } from './paths';
 
 // ---------- 类型 ----------
 
@@ -23,14 +24,14 @@ export interface UserInfo {
 
 /** 登录 */
 export const login = (data: LoginRequest) =>
-  post<LoginResponse>('/api/v1/system/auth/login', data);
+  post<LoginResponse>(API_PATHS.auth.login, data);
 
 /** 登出 */
-export const logout = () => post<void>('/api/v1/system/auth/logout');
+export const logout = () => post<void>(API_PATHS.auth.logout);
 
 /** 注册 */
 export const register = (data: LoginRequest) =>
-  post<void>('/api/v1/system/auth/register', data);
+  post<void>(API_PATHS.auth.register, data);
 
 /** 获取当前用户 */
-export const getCurrentUser = () => get<UserInfo>('/api/v1/system/user/info');
+export const getCurrentUser = () => get<UserInfo>(API_PATHS.user.info);

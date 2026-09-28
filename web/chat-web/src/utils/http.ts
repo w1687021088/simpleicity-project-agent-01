@@ -3,6 +3,7 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios';
+import { HTTP, STORAGE_KEYS } from '@/config/constant';
 
 // ---------- 类型定义 ----------
 
@@ -125,9 +126,9 @@ function resolveConfig(
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: 10000,
+  timeout: HTTP.TIMEOUT,
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': HTTP.CONTENT_TYPE_JSON,
   },
   paramsSerializer: {
     indexes: null,
@@ -138,9 +139,9 @@ const instance = axios.create({
 
 instance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `${HTTP.BEARER_PREFIX}${token}`;
     }
     return config;
   },
@@ -174,7 +175,7 @@ instance.interceptors.response.use(
 
     // 401 未授权：按需处理跳转登录
     if (resp?.status === 401) {
-      localStorage.removeItem('token');
+      localStorage.removeItem(STORAGE_KEYS.TOKEN);
       if (!window.location.pathname.startsWith('/login')) {
         window.location.href = '/login';
       }
