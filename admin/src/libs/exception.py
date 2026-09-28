@@ -153,6 +153,7 @@ def register_exception(app: FastAPI):
         request_id = getattr(request.state, "request_id", None)
         path = request.url.path
         method = request.method
+        body_str = _get_body_str(request)
 
         logger.bind(
             path=path,
@@ -160,6 +161,9 @@ def register_exception(app: FastAPI):
             request_id=request_id,
             error_count=len(exc.errors()),
             errors=errors,
+            path_params=dict(request.path_params),
+            query_params=dict(request.query_params),
+            request_body=body_str,
         ).warning(f"请求参数校验失败: {path}")
 
         return AppResponse(

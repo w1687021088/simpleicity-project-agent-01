@@ -1,6 +1,5 @@
 from datetime import datetime, UTC
 
-
 from src.config.biz_code import BizCode
 from src.libs.exception import raise_biz_error
 from src.models import User
@@ -13,7 +12,7 @@ from src.apps.system.schemas import (
     AuthRegisterResponse,
     AuthLoginBody,
     AuthLoginResponse,
-    UserInfoResponse,
+    UserInfoResponse, AuthChangePasswordBody,
 )
 
 
@@ -110,18 +109,40 @@ async def handle_logout(current_user: dict):
     """处理登出逻辑"""
     jti = current_user.get("jti")
     exp = current_user.get("exp")
+    await _add_token_to_blacklist(jti, exp)
+
+
+async def handle_change_password(body: AuthChangePasswordBody, current_user: dict):
+    """处理修改密码逻辑"""
+    user_id = current_user.get("user_id")
+    jti = current_user.get("jti")
+    exp = current_user.get("exp")
+
+    # 1. 获取用户
+    user: User = await User.get_or_none(user_id=user_id)
+    if not user:
+        raise_biz_error(BizCode.USER_NOT_FOUND)
+
+    # 2. 验证旧密码
+    if not verify_password(body.old_password, user.password):
+        raise_biz_error(BizCode.USER_PASSWORD_ERROR)
+
+    # 3. 更新密码
+    user.password = hash_password(body.new_password)
+    await user.save(update_fields=["password"])
+
+    # 4. 将当前 token 加入黑名单（强制登出）
+    await _add_token_to_blacklist(jti, exp)
+
+
+async def _add_token_to_blacklist(jti: str, exp: int | None) -> None:
+    """把 jti 加入黑名单，TTL 与 token 剩余有效期一致"""
     if not jti:
         raise_biz_error(BizCode.TOKEN_MISSING_JTI)
 
-    blacklist_key = access_token_blocklist_key_prefix(jti)
-
-    if exp:
-        ttl = int(exp - datetime.now(UTC).timestamp())
-        if ttl > 0:
-            await app_redis.set(blacklist_key, "1", ex=ttl)
-        else:
-            # token 已过期，仍保留 60 秒作为缓冲
-            await app_redis.set(blacklist_key, "1", ex=60)
-    else:
-        # 无 exp 则默认保留 1 小时
-        await app_redis.set(blacklist_key, "1", ex=3600)
+    ttl = max(int(exp - datetime.now(UTC).timestamp()), 60) if exp else 3600
+    await app_redis.set(
+        access_token_blocklist_key_prefix(jti),
+        "1",
+        ex=ttl,
+    )
