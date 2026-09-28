@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { UserPlus } from 'lucide-react';
 import AuthForm from '@/pages/Login/AuthForm';
@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { register, type RegisterRequest } from '@/apis/auth';
 import { ApiError } from '@/utils/http';
 import { paths } from '@/router/paths';
+import { useAuth } from '@/stores/auth.tsx';
 
 const INITIAL_FORM: RegisterRequest = {
   username: '',
@@ -14,6 +15,7 @@ const INITIAL_FORM: RegisterRequest = {
   confirm_password: '',
   phone: '',
   email: '',
+  nickname: '',
 };
 
 /** 输入框下方的小红字 */
@@ -26,12 +28,11 @@ function FieldError({ message }: { message?: string }) {
 }
 
 export default function RegisterPage() {
+  const { setToken } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<RegisterRequest>(INITIAL_FORM);
-  /** 字段级错误：{ password: '密码强度不够', ... } */
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  /** 通用错误（非字段级的） */
   const [generalError, setGeneralError] = useState<string | null>(null);
 
   const set = <K extends keyof RegisterRequest>(
@@ -39,7 +40,6 @@ export default function RegisterPage() {
     value: RegisterRequest[K],
   ) => {
     setForm((prev) => ({ ...prev, [key]: value }));
-    // 用户一改动，就清掉该字段的错误
     setFieldErrors((prev) => {
       if (!prev[key]) return prev;
       const next = { ...prev };
@@ -53,7 +53,6 @@ export default function RegisterPage() {
     setFieldErrors({});
     setGeneralError(null);
 
-    // 前端基本校验
     if (form.password !== form.confirm_password) {
       setFieldErrors({ confirm_password: '两次输入的密码不一致' });
       return;
@@ -67,14 +66,15 @@ export default function RegisterPage() {
         confirm_password: form.confirm_password,
         ...(form.phone ? { phone: form.phone } : {}),
         ...(form.email ? { email: form.email } : {}),
+        ...(form.nickname ? { nickname: form.nickname } : {}),
       };
 
-      await register(payload);
-      navigate(paths.login, { replace: true });
+      const res = await register(payload);
+      setToken(res.token);
+      navigate(paths.home, { replace: true });
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.isValidationError() && err.errors) {
-          // 把后端的 body.xxx 映射到本地字段名
           const map: Record<string, string> = {};
           for (const fe of err.errors) {
             const key = fe.field.replace(/^body\./, '');
@@ -115,6 +115,7 @@ export default function RegisterPage() {
       }
     >
       <div className="space-y-4">
+        {/* 用户名 */}
         <div className="space-y-2">
           <Label htmlFor="username">用户名</Label>
           <Input
@@ -127,57 +128,81 @@ export default function RegisterPage() {
           <FieldError message={fieldErrors.username} />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="password">密码</Label>
-          <Input
-            id="password"
-            type="password"
-            autoComplete="new-password"
-            aria-invalid={!!fieldErrors.password}
-            value={form.password}
-            onChange={(e) => set('password', e.target.value)}
-          />
-          <FieldError message={fieldErrors.password} />
+        {/* 密码 + 确认密码 */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="password">密码</Label>
+            <Input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              aria-invalid={!!fieldErrors.password}
+              value={form.password}
+              onChange={(e) => set('password', e.target.value)}
+            />
+            <FieldError message={fieldErrors.password} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirm_password">确认密码</Label>
+            <Input
+              id="confirm_password"
+              type="password"
+              autoComplete="new-password"
+              aria-invalid={!!fieldErrors.confirm_password}
+              value={form.confirm_password}
+              onChange={(e) => set('confirm_password', e.target.value)}
+            />
+            <FieldError message={fieldErrors.confirm_password} />
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="confirm_password">确认密码</Label>
-          <Input
-            id="confirm_password"
-            type="password"
-            autoComplete="new-password"
-            aria-invalid={!!fieldErrors.confirm_password}
-            value={form.confirm_password}
-            onChange={(e) => set('confirm_password', e.target.value)}
-          />
-          <FieldError message={fieldErrors.confirm_password} />
+        {/* 分隔线 */}
+        <div className="relative py-1">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border/60" />
+          </div>
+          <div className="relative flex justify-center">
+            <span className="bg-background/70 px-2 text-xs text-muted-foreground">
+              可选信息
+            </span>
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="phone">
-            手机号
-            <span className="ml-1 text-xs text-muted-foreground">（可选）</span>
-          </Label>
-          <Input
-            id="phone"
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel"
-            placeholder="11 位手机号"
-            aria-invalid={!!fieldErrors.phone}
-            value={form.phone}
-            onChange={(e) =>
-              set('phone', e.target.value.replace(/\D/g, '').slice(0, 11))
-            }
-          />
-          <FieldError message={fieldErrors.phone} />
+        {/* 昵称 + 手机号 */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="nickname">昵称</Label>
+            <Input
+              id="nickname"
+              autoComplete="nickname"
+              placeholder="张三"
+              aria-invalid={!!fieldErrors.nickname}
+              value={form.nickname}
+              onChange={(e) => set('nickname', e.target.value)}
+            />
+            <FieldError message={fieldErrors.nickname} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone">手机号</Label>
+            <Input
+              id="phone"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel"
+              placeholder="11 位手机号"
+              aria-invalid={!!fieldErrors.phone}
+              value={form.phone}
+              onChange={(e) =>
+                set('phone', e.target.value.replace(/\D/g, '').slice(0, 11))
+              }
+            />
+            <FieldError message={fieldErrors.phone} />
+          </div>
         </div>
 
+        {/* 邮箱 */}
         <div className="space-y-2">
-          <Label htmlFor="email">
-            邮箱
-            <span className="ml-1 text-xs text-muted-foreground">（可选）</span>
-          </Label>
+          <Label htmlFor="email">邮箱</Label>
           <Input
             id="email"
             type="email"
