@@ -36,7 +36,7 @@ async def handle_register(body: AuthRegisterBody) -> AuthRegisterResponse:
         data={"sub": user.username, "user_id": str(user.user_id)}
     )
 
-    return RegisterResponse(
+    return AuthRegisterResponse(
         user_id=str(user.user_id),
         username=user.username,
         phone=user.phone,
