@@ -107,7 +107,7 @@ export function buildPath(template: string, params: PathParams): string {
     }
     return encodeURIComponent(String(value));
   };
-  return template.replace(/\{(\w+)\}/g, replace).replace(/:(\w+)/g, replace);
+  return template.replace(/\{(\w+)}/g, replace).replace(/:(\w+)/g, replace);
 }
 
 function resolveConfig(
@@ -154,7 +154,7 @@ instance.interceptors.response.use(
     const body = response.data;
 
     // 后端业务错误：HTTP 200，但 success === false
-    if (body?.success === false) {
+    if (!body?.success) {
       return Promise.reject(
         new ApiError({
           message: body.message || '请求失败',
