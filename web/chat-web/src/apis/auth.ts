@@ -8,21 +8,13 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface LoginResponse {
-  access_token: string;
-  token_type: string;
-}
-
 /** 注册请求体 */
 export interface RegisterRequest {
   username: string;
   password: string;
   confirm_password: string;
-  /** 手机号，可选，11 位数字 */
   phone?: string;
-  /** 邮箱，可选 */
   email?: string;
-  /** 昵称，可选 */
   nickname?: string;
 }
 
@@ -38,7 +30,12 @@ export interface UserInfo {
   is_active: boolean;
 }
 
-/** 注册响应 —— 对齐后端 RegisterResponse */
+/** 登录响应 —— 对齐 AuthLoginResponse */
+export interface LoginResponse extends UserInfo {
+  token: string;
+}
+
+/** 注册响应 —— 对齐 AuthRegisterResponse */
 export interface RegisterResponse extends UserInfo {
   token: string;
 }
