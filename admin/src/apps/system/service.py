@@ -9,6 +9,7 @@ from src.apps.system.schemas import (
     AuthRegisterResponse,
     AuthLoginBody,
     AuthLoginResponse,
+    UserInfoResponse,
 )
 
 
@@ -78,4 +79,24 @@ async def handle_login(body: AuthLoginBody) -> AuthLoginResponse:
         created_at=user.created_at.isoformat(),
         updated_at=user.updated_at.isoformat(),
         token=token,
+    )
+
+
+async def get_user_info(current_user: dict) -> UserInfoResponse:
+    """ 处理获取用户信息逻辑 """
+    user_id = current_user.get("user_id")
+
+    user = await User.get_or_none(user_id=user_id)
+    if not user:
+        raise_biz_error(BizCode.USER_NOT_FOUND)
+
+    return UserInfoResponse(
+        user_id=str(user.user_id),
+        username=user.username,
+        phone=user.phone,
+        email=user.email,
+        nickname=user.nickname,
+        is_active=user.is_active,
+        created_at=user.created_at.isoformat(),
+        updated_at=user.updated_at.isoformat(),
     )

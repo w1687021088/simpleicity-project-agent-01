@@ -1,13 +1,24 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from tortoise import connections
+
+from src.apps.dependencies import require_auth
+from src.libs.logger import logger
+from src.config.response import AppResponse, AppResponseModel
+from src.apps.system.service import (
+    get_user_info,
+)
+from src.apps.system.schemas import UserInfoResponse
+
 
 router = APIRouter()
 
 
-@router.get("/info", description="获取用户信息")
-async def info():
-    return {"code": 200, "msg": "ok", "data": {"app": "你好"}}
+@router.get("/info", description="获取用户信息", response_model=AppResponseModel[UserInfoResponse])
+async def info(current_user: dict = Depends(require_auth)):
+    logger.info(f"查询用户信息: user_id={current_user.get('user_id')}")
+    result = await get_user_info(current_user)
+    return AppResponse(data=result.model_dump())
 
 
 @router.get("/health/db", description="数据库健康检查")
