@@ -35,7 +35,7 @@ export default function AuthForm({
 
       <form
         onSubmit={onSubmit}
-        className="relative w-full max-w-sm space-y-6 overflow-hidden rounded-2xl border border-border/60 bg-background/70 p-8 shadow-lg backdrop-blur-md"
+        className="relative w-full max-w-md space-y-6 overflow-hidden rounded-2xl border border-border/60 bg-background/70 p-6 shadow-lg backdrop-blur-md sm:p-8"
       >
         <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-foreground/25 to-transparent" />
 
@@ -47,7 +47,9 @@ export default function AuthForm({
             {badge}
           </span>
           <div className="space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
+              {title}
+            </h1>
             <p className="text-sm text-muted-foreground">{description}</p>
           </div>
         </div>

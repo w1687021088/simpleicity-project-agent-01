@@ -127,13 +127,26 @@ html, body {
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+    * {
+        @apply border-border outline-ring/50;
     }
-  body {
-    @apply bg-background text-foreground;
+
+    body {
+        @apply bg-background text-foreground;
+        /* 移动端禁止横向滚动 */
+        overflow-x: hidden;
+        /* 移动端点击高亮去掉 */
+        -webkit-tap-highlight-color: transparent;
     }
-  html {
-    @apply font-sans;
+
+    html {
+        @apply font-sans;
+    }
+
+    /* 移动端 iOS 输入框自动放大问题：font-size 至少 16px */
+    input,
+    textarea,
+    select {
+        font-size: 16px;
     }
 }

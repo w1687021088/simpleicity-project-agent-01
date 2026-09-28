@@ -26,6 +26,10 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const res = await login(form);
+      if (!res.access_token) {
+        setError('登录失败，请检查用户名和密码');
+        return;
+      }
       setToken(res.access_token);
       navigate(from, { replace: true });
     } catch (err) {
