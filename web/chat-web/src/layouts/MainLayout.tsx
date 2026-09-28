@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Link, Outlet, useNavigate, useLocation } from 'react-router';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import {
+  Home,
+  LogOut,
   Menu,
-  X,
+  MoreHorizontal,
   PanelLeftClose,
   PanelLeftOpen,
-  Home,
-  Sparkles,
   Settings,
-  LogOut,
-  MoreHorizontal,
+  Sparkles,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -30,6 +30,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import ChangePasswordDialog from '@/components/change-password-dialog';
+
 import { useAuth } from '@/stores/auth';
 import { logout } from '@/apis/auth';
 import { paths } from '@/router/paths';
@@ -58,6 +60,7 @@ export default function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { clearToken, user, loading } = useAuth();
+  const [passwordOpen, setPasswordOpen] = useState(false);
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
@@ -177,6 +180,14 @@ export default function MainLayout() {
 
       <DropdownMenuSeparator />
 
+      <DropdownMenuItem
+        onClick={() => setPasswordOpen(true)}
+        disabled={loading}
+      >
+        <Settings className="size-4" />
+        修改密码
+      </DropdownMenuItem>
+
       <DropdownMenuItem onClick={handleSettings} disabled={loading}>
         <Settings className="size-4" />
         设置
@@ -187,7 +198,7 @@ export default function MainLayout() {
       <DropdownMenuItem
         onClick={requestLogout}
         disabled={loading}
-        className="text-destructive focus:text-destructive"
+        className="text-destructive"
       >
         <LogOut className="size-4" />
         退出登录
@@ -393,6 +404,12 @@ export default function MainLayout() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 修改密码 */}
+      <ChangePasswordDialog
+        open={passwordOpen}
+        onOpenChange={setPasswordOpen}
+      />
 
       {/* 主内容区 */}
       <main className="flex-1 p-4 md:p-6">

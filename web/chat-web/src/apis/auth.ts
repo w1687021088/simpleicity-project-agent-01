@@ -40,6 +40,12 @@ export interface RegisterResponse extends UserInfo {
   token: string;
 }
 
+export interface ChangePasswordRequest {
+  old_password: string;
+  new_password: string;
+  confirm_password: string;
+}
+
 // ---------- 接口 ----------
 
 /** 登录 */
@@ -55,3 +61,7 @@ export const register = (data: RegisterRequest) =>
 
 /** 获取当前用户 */
 export const getCurrentUser = () => get<UserInfo>(API_PATHS.user.info);
+
+/** 修改密码 */
+export const changePassword = (data: ChangePasswordRequest) =>
+  post<void>('/api/v1/system/auth/change-password', data);
