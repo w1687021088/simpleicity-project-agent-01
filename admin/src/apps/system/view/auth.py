@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body
 
 from src.libs.logger import logger
-from src.config.response import AppResponse
+from src.config.response import AppResponse, AppResponseModel
 
 from src.apps.system.schemas import (AuthLoginBody, AuthRegisterBody, AuthRegisterResponse)
 from src.apps.system.service import (
@@ -20,11 +20,11 @@ async def login(body: Annotated[AuthLoginBody, Body()]):
     return AppResponse(data={"message": "登录成功"})
 
 
-@router.post("/register", description="用户注册", response_model=AuthRegisterResponse)
+@router.post("/register", description="用户注册", response_model=AppResponseModel[AuthRegisterResponse])
 async def register(body: Annotated[AuthRegisterBody, Body()]):
     logger.info(f"注册请求: username={body.username}, phone={body.phone}, email={body.email}")
     result = await handle_register(body)
-    return AppResponse(data=result)
+    return AppResponse(data=result.model_dump())
 
 
 @router.post("/logout", description="登出")

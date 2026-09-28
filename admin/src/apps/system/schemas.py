@@ -2,8 +2,6 @@ from pydantic import BaseModel, Field, field_validator, ValidationInfo
 import re
 from typing import Annotated
 
-from src.config.response import AppResponseModel
-
 
 def _validate_password_strength(v: str) -> str:
     """密码强度校验：长度8~32，必须含数字和特殊符号，只能包含特定字符集"""
@@ -88,12 +86,12 @@ class UserInfoResponse(BaseModel):
     is_active: Annotated[bool, Field(description="是否启用")]
 
 
-class RegisterResponse(UserInfoResponse):
+class AuthRegisterResponse(UserInfoResponse):
     """注册响应"""
     token: str
 
 
-class LoginResponse(UserInfoResponse):
+class AuthLoginResponse(UserInfoResponse):
     """登录响应"""
     token: str
 
@@ -126,8 +124,3 @@ class AuthChangePasswordBody(BaseModel):
         if old and v == old:
             raise ValueError("新密码不能与旧密码相同")
         return v
-
-
-AuthRegisterResponse = AppResponseModel[RegisterResponse]
-
-AuthLoginResponse = AppResponseModel[LoginResponse]
