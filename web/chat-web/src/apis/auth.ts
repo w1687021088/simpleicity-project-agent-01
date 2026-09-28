@@ -64,4 +64,4 @@ export const getCurrentUser = () => get<UserInfo>(API_PATHS.user.info);
 
 /** 修改密码 */
 export const changePassword = (data: ChangePasswordRequest) =>
-  post<void>('/api/v1/system/auth/change-password', data);
+  post<void>(API_PATHS.user.changePassword, data);
