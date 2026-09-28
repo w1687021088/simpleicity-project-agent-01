@@ -20,6 +20,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useAuth } from '@/stores/auth';
 import { logout } from '@/apis/auth';
 import { paths } from '@/router/paths';
@@ -53,18 +63,24 @@ export default function MainLayout() {
   const [collapsed, setCollapsed] = useState(() => {
     return localStorage.getItem(SIDEBAR_KEY) === '1';
   });
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0');
   }, [collapsed]);
 
-  const handleLogout = async () => {
+  const requestLogout = () => {
+    setLogoutOpen(true);
+  };
+
+  const confirmLogout = async () => {
     try {
       await logout();
     } catch {
       // 忽略
     } finally {
       clearToken();
+      setLogoutOpen(false);
       navigate(paths.login, { replace: true });
     }
   };
@@ -75,7 +91,6 @@ export default function MainLayout() {
 
   const isActive = (to: string) => location.pathname === to;
 
-  // 加载中显示占位，避免闪「未登录」
   const displayName = loading
     ? '加载中…'
     : user?.nickname || user?.username || '未登录';
@@ -170,9 +185,9 @@ export default function MainLayout() {
       <DropdownMenuSeparator />
 
       <DropdownMenuItem
-        onClick={handleLogout}
+        onClick={requestLogout}
         disabled={loading}
-        className="text-destructive"
+        className="text-destructive focus:text-destructive"
       >
         <LogOut className="size-4" />
         退出登录
@@ -357,6 +372,27 @@ export default function MainLayout() {
           </aside>
         </>
       )}
+
+      {/* 退出登录确认框 */}
+      <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确定退出登录？</AlertDialogTitle>
+            <AlertDialogDescription>
+              退出后需要重新输入账号密码才能继续使用。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmLogout}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
+              退出登录
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* 主内容区 */}
       <main className="flex-1 p-4 md:p-6">
