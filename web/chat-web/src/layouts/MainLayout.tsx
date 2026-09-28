@@ -33,7 +33,7 @@ import {
 import ChangePasswordDialog from '@/components/change-password-dialog';
 
 import { useAuth } from '@/stores/auth';
-import { logout } from '@/apis/auth';
+import { logout } from '@/apis';
 import { paths } from '@/router/paths';
 import { cn } from '@/lib/utils';
 

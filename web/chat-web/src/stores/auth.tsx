@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { STORAGE_KEYS } from '@/config/constant';
-import { getCurrentUser, type UserInfo } from '@/apis/auth';
+import { getCurrentUser, type UserInfo } from '@/apis';
 
 interface AuthContextValue {
   token: string | null;

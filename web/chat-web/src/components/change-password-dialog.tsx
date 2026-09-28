@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ApiError } from '@/utils/http';
-import { changePassword } from '@/apis/auth';
+import { changePassword } from '@/apis';
 
 interface ChangePasswordDialogProps {
   open: boolean;

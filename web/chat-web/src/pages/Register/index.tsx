@@ -4,7 +4,7 @@ import { UserPlus } from 'lucide-react';
 import AuthForm from '@/pages/Login/AuthForm';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { register, type RegisterRequest } from '@/apis/auth';
+import { register, type RegisterRequest } from '@/apis';
 import { ApiError } from '@/utils/http';
 import { paths } from '@/router/paths';
 import { useAuth } from '@/stores/auth.tsx';

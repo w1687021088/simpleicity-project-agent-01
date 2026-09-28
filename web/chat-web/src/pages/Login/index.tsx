@@ -4,7 +4,7 @@ import { LogIn } from 'lucide-react';
 import AuthForm from './AuthForm';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { login } from '@/apis/auth';
+import { login } from '@/apis';
 import { useAuth } from '@/stores/auth';
 import { ApiError } from '@/utils/http';
 import { paths } from '@/router/paths';
