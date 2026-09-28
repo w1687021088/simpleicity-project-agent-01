@@ -13,7 +13,7 @@ export interface LoginResponse {
   token_type: string;
 }
 
-/** 注册请求体 —— 对齐后端 AuthRegisterBody */
+/** 注册请求体 */
 export interface RegisterRequest {
   username: string;
   password: string;
@@ -22,13 +22,25 @@ export interface RegisterRequest {
   phone?: string;
   /** 邮箱，可选 */
   email?: string;
+  /** 昵称，可选 */
+  nickname?: string;
 }
 
+/** 用户信息 */
 export interface UserInfo {
-  id: number;
+  user_id: string;
   username: string;
-  email: string;
-  roles: string[];
+  phone: string | null;
+  email: string | null;
+  nickname: string | null;
+  created_at: string;
+  updated_at: string;
+  is_active: boolean;
+}
+
+/** 注册响应 —— 对齐后端 RegisterResponse */
+export interface RegisterResponse extends UserInfo {
+  token: string;
 }
 
 // ---------- 接口 ----------
@@ -42,7 +54,7 @@ export const logout = () => post<void>(API_PATHS.auth.logout);
 
 /** 注册 */
 export const register = (data: RegisterRequest) =>
-  post<void>(API_PATHS.auth.register, data);
+  post<RegisterResponse>(API_PATHS.auth.register, data);
 
 /** 获取当前用户 */
 export const getCurrentUser = () => get<UserInfo>(API_PATHS.user.info);
