@@ -12,7 +12,7 @@ import { paths } from '@/router/paths';
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { setToken } = useAuth();
+  const { setToken, setUser } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ username: '', password: '' });
@@ -31,6 +31,7 @@ export default function LoginPage() {
         return;
       }
       setToken(res.token);
+      setUser(res);
       navigate(from, { replace: true });
     } catch (err) {
       if (err instanceof ApiError) {

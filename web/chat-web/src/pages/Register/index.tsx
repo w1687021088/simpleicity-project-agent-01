@@ -28,7 +28,7 @@ function FieldError({ message }: { message?: string }) {
 }
 
 export default function RegisterPage() {
-  const { setToken } = useAuth();
+  const { setToken, setUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<RegisterRequest>(INITIAL_FORM);
@@ -71,6 +71,7 @@ export default function RegisterPage() {
 
       const res = await register(payload);
       setToken(res.token);
+      setUser(res);
       navigate(paths.home, { replace: true });
     } catch (err) {
       if (err instanceof ApiError) {
