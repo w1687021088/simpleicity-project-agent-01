@@ -12,7 +12,7 @@ import { useAuth } from '@/stores/auth.tsx';
 const INITIAL_FORM: RegisterRequest = {
   username: '',
   password: '',
-  confirm_password: '',
+  confirm_new_password: '',
   phone: '',
   email: '',
   nickname: '',
@@ -53,8 +53,8 @@ export default function RegisterPage() {
     setFieldErrors({});
     setGeneralError(null);
 
-    if (form.password !== form.confirm_password) {
-      setFieldErrors({ confirm_password: '两次输入的密码不一致' });
+    if (form.password !== form.confirm_new_password) {
+      setFieldErrors({ confirm_new_password: '两次输入的密码不一致' });
       return;
     }
 
@@ -63,7 +63,7 @@ export default function RegisterPage() {
       const payload: RegisterRequest = {
         username: form.username,
         password: form.password,
-        confirm_password: form.confirm_password,
+        confirm_new_password: form.confirm_new_password,
         ...(form.phone ? { phone: form.phone } : {}),
         ...(form.email ? { email: form.email } : {}),
         ...(form.nickname ? { nickname: form.nickname } : {}),
@@ -144,16 +144,16 @@ export default function RegisterPage() {
             <FieldError message={fieldErrors.password} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirm_password">确认密码</Label>
+            <Label htmlFor="confirm_new_password">确认密码</Label>
             <Input
-              id="confirm_password"
+              id="confirm_new_password"
               type="password"
               autoComplete="new-password"
-              aria-invalid={!!fieldErrors.confirm_password}
-              value={form.confirm_password}
-              onChange={(e) => set('confirm_password', e.target.value)}
+              aria-invalid={!!fieldErrors.confirm_new_password}
+              value={form.confirm_new_password}
+              onChange={(e) => set('confirm_new_password', e.target.value)}
             />
-            <FieldError message={fieldErrors.confirm_password} />
+            <FieldError message={fieldErrors.confirm_new_password} />
           </div>
         </div>
 

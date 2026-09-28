@@ -9,7 +9,7 @@ export interface LoginRequest {
 export interface RegisterRequest {
   username: string;
   password: string;
-  confirm_password: string;
+  confirm_new_password: string;
   phone?: string;
   email?: string;
   nickname?: string;
@@ -41,5 +41,5 @@ export interface RegisterResponse extends UserInfo {
 export interface ChangePasswordRequest {
   old_password: string;
   new_password: string;
-  confirm_password: string;
+  confirm_new_password: string;
 }

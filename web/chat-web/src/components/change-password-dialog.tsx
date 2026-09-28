@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { toast } from '@/components/ui/toast';
+
 import { ApiError } from '@/utils/http';
+import { forceLogout } from '@/utils/auth';
 import { changePassword } from '@/apis';
 
 interface ChangePasswordDialogProps {
@@ -21,7 +25,7 @@ interface ChangePasswordDialogProps {
 const INITIAL = {
   old_password: '',
   new_password: '',
-  confirm_password: '',
+  confirm_new_password: '',
 };
 
 export default function ChangePasswordDialog({
@@ -40,7 +44,6 @@ export default function ChangePasswordDialog({
   const handleOpenChange = (v: boolean) => {
     if (loading) return;
     if (!v) {
-      // 关闭时重置
       setForm(INITIAL);
       setError(null);
     }
@@ -51,7 +54,7 @@ export default function ChangePasswordDialog({
     e.preventDefault();
     setError(null);
 
-    if (form.new_password !== form.confirm_password) {
+    if (form.new_password !== form.confirm_new_password) {
       setError('两次输入的新密码不一致');
       return;
     }
@@ -61,11 +64,18 @@ export default function ChangePasswordDialog({
       await changePassword({
         old_password: form.old_password,
         new_password: form.new_password,
-        confirm_password: form.confirm_password,
+        confirm_new_password: form.confirm_new_password,
       });
-      // 成功后关闭
+
       setForm(INITIAL);
       onOpenChange(false);
+
+      toast.add({
+        title: '密码修改成功',
+        description: '请使用新密码重新登录',
+        type: 'success',
+      });
+      forceLogout(800);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -109,13 +119,13 @@ export default function ChangePasswordDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirm_password">确认新密码</Label>
+            <Label htmlFor="confirm_new_password">确认新密码</Label>
             <Input
-              id="confirm_password"
+              id="confirm_new_password"
               type="password"
               autoComplete="new-password"
-              value={form.confirm_password}
-              onChange={(e) => set('confirm_password', e.target.value)}
+              value={form.confirm_new_password}
+              onChange={(e) => set('confirm_new_password', e.target.value)}
             />
           </div>
 

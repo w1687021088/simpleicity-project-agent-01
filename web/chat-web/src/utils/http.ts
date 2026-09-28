@@ -4,6 +4,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios';
 import { HTTP, STORAGE_KEYS } from '@/config/constant';
+import { forceLogout } from '@/utils/auth';
 
 // ---------- 类型定义 ----------
 
@@ -49,6 +50,18 @@ export interface RequestOptions extends Omit<
   pathParams?: PathParams;
 }
 
+// ---------- 认证失败业务码 ----------
+
+/**
+ * token 相关业务错误码（与后端 BizCode 对应）
+ * - 2100 TOKEN_MISSING
+ * - 2101 TOKEN_INVALID
+ * - 2102 TOKEN_EXPIRED
+ * - 2103 TOKEN_BLACKLISTED
+ * - 2104 TOKEN_MISSING_JTI
+ */
+const AUTH_FAIL_CODES = new Set([2100, 2101, 2102, 2103, 2104]);
+
 // ---------- 业务错误类 ----------
 
 export class ApiError extends Error {
@@ -78,6 +91,11 @@ export class ApiError extends Error {
   /** 是否为字段校验错误 */
   isValidationError(): boolean {
     return Array.isArray(this.errors) && this.errors.length > 0;
+  }
+
+  /** 是否为认证失败（token 相关） */
+  isAuthError(): boolean {
+    return AUTH_FAIL_CODES.has(this.code);
   }
 }
 
@@ -156,10 +174,17 @@ instance.interceptors.response.use(
 
     // 后端业务错误：HTTP 200，但 success === false
     if (!body?.success) {
+      const code = body.code ?? -1;
+
+      // 认证失败：清 token + 跳登录
+      if (AUTH_FAIL_CODES.has(code)) {
+        forceLogout();
+      }
+
       return Promise.reject(
         new ApiError({
           message: body.message || '请求失败',
-          code: body.code ?? -1,
+          code,
           data: body.data,
           requestId: body.request_id,
           errors: body.errors,
@@ -173,16 +198,13 @@ instance.interceptors.response.use(
   (error) => {
     const resp = error.response as AxiosResponse<ApiResponse> | undefined;
 
-    // 401 未授权
-    if (resp?.status === 401) {
-      localStorage.removeItem(STORAGE_KEYS.TOKEN);
-      if (!window.location.pathname.startsWith('/login')) {
-        window.location.href = '/login';
-      }
-    }
-
     // 有响应（HTTP 4xx / 5xx）
     if (resp) {
+      // 401 未授权：清 token + 跳登录
+      if (resp.status === 401) {
+        forceLogout();
+      }
+
       const body = resp.data;
 
       // body 可能是：正常对象 / 空字符串 / HTML / 其他非对象
@@ -197,6 +219,13 @@ instance.interceptors.response.use(
         : undefined;
       const bodyErrors = isObject ? (body as ApiResponse).errors : undefined;
 
+      const code = bodyCode ?? resp.status;
+
+      // 业务码层面的认证失败也踢出（防止后端返回 200 + code=2102 这类情况）
+      if (AUTH_FAIL_CODES.has(code)) {
+        forceLogout();
+      }
+
       // 500 一律给友好中文，不暴露状态码
       const fallbackMessage =
         resp.status >= 500
@@ -206,7 +235,7 @@ instance.interceptors.response.use(
       return Promise.reject(
         new ApiError({
           message: bodyMessage || fallbackMessage,
-          code: bodyCode ?? resp.status,
+          code,
           data: bodyData,
           requestId: bodyRequestId,
           errors: bodyErrors,

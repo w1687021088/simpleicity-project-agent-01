@@ -6,6 +6,6 @@ export const API_PATHS = {
   },
   user: {
     info: '/api/v1/system/user/info',
-    changePassword: '/api/v1/system/auth/change-password',
+    changePassword: '/api/v1/system/user/change-password',
   },
 } as const;
