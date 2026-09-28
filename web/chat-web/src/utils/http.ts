@@ -174,8 +174,10 @@ instance.interceptors.response.use(
 
     // 401 未授权：按需处理跳转登录
     if (resp?.status === 401) {
-      // localStorage.removeItem('token');
-      // window.location.href = '/login';
+      localStorage.removeItem('token');
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login';
+      }
     }
 
     // 服务端返回了响应体（HTTP 4xx/5xx，或 FastAPI 兜底 500）

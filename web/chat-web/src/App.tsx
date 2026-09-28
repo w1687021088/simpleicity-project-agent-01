@@ -1,31 +1,21 @@
-import { Button } from '@/components/ui/button.tsx';
-import { getUserInfo } from '@/apis/user';
-
-const apiUrl = import.meta.env.VITE_API_BASE_URL;
-const appTitle = import.meta.env.VITE_APP_TITLE;
-
-console.log(`API URL: ${apiUrl}`);
-console.log(`App Title: ${appTitle}`);
+import { Suspense } from 'react';
+import { Spinner } from '@/components/ui/spinner';
+import { AuthProvider } from '@/stores/auth';
+import AppRouter from '@/router';
 
 function App() {
   return (
-    <>
-      <div className="mt-3.5 flex w-full items-center justify-center gap-4">
-        <Button
-          variant="outline"
-          onClick={async () => {
-            try {
-              await getUserInfo();
-              console.log('User info retrieved successfully');
-            } catch (error) {
-              console.error('失败:', error);
-            }
-          }}
-        >
-          测试
-        </Button>
-      </div>
-    </>
+    <AuthProvider>
+      <Suspense
+        fallback={
+          <div className="flex h-screen items-center justify-center">
+            <Spinner className="size-8" />
+          </div>
+        }
+      >
+        <AppRouter />
+      </Suspense>
+    </AuthProvider>
   );
 }
 
