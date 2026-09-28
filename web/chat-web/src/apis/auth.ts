@@ -13,6 +13,17 @@ export interface LoginResponse {
   token_type: string;
 }
 
+/** 注册请求体 —— 对齐后端 AuthRegisterBody */
+export interface RegisterRequest {
+  username: string;
+  password: string;
+  confirm_password: string;
+  /** 手机号，可选，11 位数字 */
+  phone?: string;
+  /** 邮箱，可选 */
+  email?: string;
+}
+
 export interface UserInfo {
   id: number;
   username: string;
@@ -30,7 +41,7 @@ export const login = (data: LoginRequest) =>
 export const logout = () => post<void>(API_PATHS.auth.logout);
 
 /** 注册 */
-export const register = (data: LoginRequest) =>
+export const register = (data: RegisterRequest) =>
   post<void>(API_PATHS.auth.register, data);
 
 /** 获取当前用户 */

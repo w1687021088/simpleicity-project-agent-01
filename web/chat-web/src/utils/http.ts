@@ -173,7 +173,7 @@ instance.interceptors.response.use(
   (error) => {
     const resp = error.response as AxiosResponse<ApiResponse> | undefined;
 
-    // 401 未授权：按需处理跳转登录
+    // 401 未授权
     if (resp?.status === 401) {
       localStorage.removeItem(STORAGE_KEYS.TOKEN);
       if (!window.location.pathname.startsWith('/login')) {
@@ -181,18 +181,35 @@ instance.interceptors.response.use(
       }
     }
 
-    // 服务端返回了响应体（HTTP 4xx/5xx，或 FastAPI 兜底 500）
-    // 新结构下，错误响应也带 success=false、code、message、data
+    // 有响应（HTTP 4xx / 5xx）
     if (resp) {
       const body = resp.data;
+
+      // body 可能是：正常对象 / 空字符串 / HTML / 其他非对象
+      const isObject =
+        body !== null && typeof body === 'object' && !Array.isArray(body);
+
+      const bodyMessage = isObject ? (body as ApiResponse).message : undefined;
+      const bodyCode = isObject ? (body as ApiResponse).code : undefined;
+      const bodyData = isObject ? (body as ApiResponse).data : body;
+      const bodyRequestId = isObject
+        ? (body as ApiResponse).request_id
+        : undefined;
+      const bodyErrors = isObject ? (body as ApiResponse).errors : undefined;
+
+      // 500 一律给友好中文，不暴露状态码
+      const fallbackMessage =
+        resp.status >= 500
+          ? '服务器开小差了，请稍后重试'
+          : error.message || `请求失败 (${resp.status})`;
+
       return Promise.reject(
         new ApiError({
-          message:
-            body?.message || error.message || `请求失败 (${resp.status})`,
-          code: body?.code ?? resp.status,
-          data: body?.data,
-          requestId: body?.request_id,
-          errors: body?.errors,
+          message: bodyMessage || fallbackMessage,
+          code: bodyCode ?? resp.status,
+          data: bodyData,
+          requestId: bodyRequestId,
+          errors: bodyErrors,
           httpStatus: resp.status,
         }),
       );
