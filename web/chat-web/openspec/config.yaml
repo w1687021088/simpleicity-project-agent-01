@@ -1,2 +1,32 @@
+schema: spec-driven
+
 context: |
-  All artifacts must be written in Simplified Chinese.
+  语言：所有产出物（proposal、spec、design、tasks）必须用简体中文撰写。
+  技术栈：React 19、TypeScript、Vite、Tailwind CSS。
+  UI 组件库：shadcn/ui。所有 UI 必须优先使用 shadcn/ui 组件，图标使用 lucide-react。
+  仅当 shadcn/ui 无法满足需求时，才考虑其他方案，且必须在 proposal 中说明原因。
+  样式：统一使用 Tailwind CSS 工具类，禁止内联样式和独立 CSS 文件。
+  测试：Vitest。
+
+rules:
+  proposal:
+    - 必须包含 Non-Goals（本次不做什么）。
+    - 必须说明影响的文件范围。
+  specs:
+    - 每条 Requirement 至少有一个 Scenario。
+    - Scenario 必须用 WHEN / THEN / AND 格式。
+  design:
+    - 至少列出一个备选方案并说明为何不采用。
+    - 必须列出已知风险。
+  tasks:
+    - 每个任务必须可独立验证。
+    - 涉及构建或 lint 的任务，放在最后。
+
+operations:
+  apply:
+    guidance:
+      - 只改 tasks.md 里列出的内容，不要顺手改无关文件。
+      - 保持测试摘要简洁。
+  archive:
+    guidance:
+      - 归档前先总结本次变更的结果。

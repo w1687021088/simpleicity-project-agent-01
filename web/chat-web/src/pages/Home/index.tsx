@@ -3,7 +3,7 @@ import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
-const MAX_TEXTAREA_HEIGHT = 120;
+const MAX_TEXTAREA_HEIGHT = 160;
 
 export default function HomePage() {
   const [message, setMessage] = useState('');
@@ -47,7 +47,7 @@ export default function HomePage() {
             onChange={(event) => setMessage(event.target.value)}
             placeholder="输入消息..."
             aria-label="聊天消息"
-            className="max-h-[7.75rem]"
+            className="max-h-[10rem]"
           />
           <Button
             type="submit"
