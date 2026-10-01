@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { LogIn } from 'lucide-react';
-import AuthForm from './AuthForm';
+import AuthForm from '@/components/AuthForm';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { login } from '@/apis';
@@ -46,10 +45,10 @@ export default function LoginPage() {
 
   return (
     <AuthForm
-      icon={<LogIn className="size-5" />}
-      badge="Sign In"
+      variant="login"
+      eyebrow="账户登录"
       title="登录"
-      description="输入账号密码继续"
+      description="回到你的会话与联系人"
       submitText="登录"
       loadingText="登录中…"
       loading={loading}
@@ -66,8 +65,8 @@ export default function LoginPage() {
         </p>
       }
     >
-      <div className="space-y-4">
-        <div className="space-y-2">
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
           <Label htmlFor="username">用户名</Label>
           <Input
             id="username"
@@ -79,7 +78,7 @@ export default function LoginPage() {
             }}
           />
         </div>
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <Label htmlFor="password">密码</Label>
           <Input
             id="password"
@@ -96,7 +95,7 @@ export default function LoginPage() {
         {error && (
           <div
             role="alert"
-            className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+            className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
           >
             {error}
           </div>

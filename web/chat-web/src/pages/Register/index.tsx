@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { UserPlus } from 'lucide-react';
-import AuthForm from '@/pages/Login/AuthForm';
+import AuthForm from '@/components/AuthForm';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { register, type RegisterRequest } from '@/apis';
@@ -95,10 +94,10 @@ export default function RegisterPage() {
 
   return (
     <AuthForm
-      icon={<UserPlus className="size-5" />}
-      badge="Sign Up"
+      variant="register"
+      eyebrow="创建账户"
       title="注册"
-      description="创建一个新账号"
+      description="填写基础信息，开始新的对话"
       submitText="注册"
       loadingText="注册中…"
       loading={loading}
@@ -115,9 +114,9 @@ export default function RegisterPage() {
         </p>
       }
     >
-      <div className="space-y-4">
+      <div className="flex flex-col gap-5">
         {/* 用户名 */}
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <Label htmlFor="username">用户名</Label>
           <Input
             id="username"
@@ -131,7 +130,7 @@ export default function RegisterPage() {
 
         {/* 密码 + 确认密码 */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="password">密码</Label>
             <Input
               id="password"
@@ -143,7 +142,7 @@ export default function RegisterPage() {
             />
             <FieldError message={fieldErrors.password} />
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="confirm_new_password">确认密码</Label>
             <Input
               id="confirm_new_password"
@@ -171,7 +170,7 @@ export default function RegisterPage() {
 
         {/* 昵称 + 手机号 */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="nickname">昵称</Label>
             <Input
               id="nickname"
@@ -183,7 +182,7 @@ export default function RegisterPage() {
             />
             <FieldError message={fieldErrors.nickname} />
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="phone">手机号</Label>
             <Input
               id="phone"
@@ -202,7 +201,7 @@ export default function RegisterPage() {
         </div>
 
         {/* 邮箱 */}
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <Label htmlFor="email">邮箱</Label>
           <Input
             id="email"
@@ -220,7 +219,7 @@ export default function RegisterPage() {
         {generalError && (
           <div
             role="alert"
-            className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+            className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
           >
             {generalError}
           </div>
